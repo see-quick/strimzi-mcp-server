@@ -3,7 +3,7 @@
   "description": "MCP server for interacting with Strimzi Kafka on Kubernetes. Enables AI assistants to manage and troubleshoot Strimzi resources including Kafka clusters, topics, users, connectors, and more.",
   "version": "0.1.0",
   "author": {
-    "name": "Strimzi Community"
+    "name": "see-quick"
   },
   "repository": "https://github.com/strimzi/strimzi-mcp-server",
   "license": "Apache-2.0",

@@ -60,7 +60,7 @@ mvn package -DskipTests
 
 ```bash
 /plugin marketplace add see-quick/strimzi-mcp-server
-/plugin install strimzi-mcp@strimzi-strimzi-mcp-server
+/plugin install strimzi-mcp@see-quick-strimzi-mcp-server
 ```
 
 The plugin automatically downloads the jar on first use.
