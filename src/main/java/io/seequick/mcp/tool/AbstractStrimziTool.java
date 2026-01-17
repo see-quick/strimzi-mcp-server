@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
@@ -43,7 +44,7 @@ public abstract class AbstractStrimziTool implements StrimziTool {
     /**
      * Executes the tool with the given arguments.
      */
-    protected abstract CallToolResult execute(Map<String, Object> args);
+    protected abstract CallToolResult execute(McpSchema.CallToolRequest args);
 
     /**
      * Parses a JSON schema string into a JsonSchema object.
@@ -76,14 +77,14 @@ public abstract class AbstractStrimziTool implements StrimziTool {
 
     @Override
     public McpServerFeatures.SyncToolSpecification getSpecification() {
-        return new McpServerFeatures.SyncToolSpecification(
-            Tool.builder()
+        return new McpServerFeatures.SyncToolSpecification.Builder()
+            .tool(Tool.builder()
                 .name(getName())
                 .description(getDescription())
                 .inputSchema(getInputSchema())
-                .build(),
-                (exchange, args) -> execute(args)
-        );
+                .build())
+            .callHandler((exchange, args) -> execute(args))
+            .build();
     }
 
     /**
@@ -101,38 +102,38 @@ public abstract class AbstractStrimziTool implements StrimziTool {
     }
 
     /**
-     * Gets a string argument from the args map, returning null if not present.
+     * Gets a string argument from the CallToolRequest, returning null if not present.
      */
-    protected String getStringArg(Map<String, Object> args, String key) {
-        if (args == null) return null;
-        Object value = args.get(key);
+    protected String getStringArg(McpSchema.CallToolRequest args, String key) {
+        if (args == null || args.arguments() == null) return null;
+        Object value = args.arguments().get(key);
         return value != null ? (String) value : null;
     }
 
     /**
-     * Gets an integer argument from the args map, returning the default if not present.
+     * Gets an integer argument from the CallToolRequest, returning the default if not present.
      */
-    protected int getIntArg(Map<String, Object> args, String key, int defaultValue) {
-        if (args == null) return defaultValue;
-        Object value = args.get(key);
+    protected int getIntArg(McpSchema.CallToolRequest args, String key, int defaultValue) {
+        if (args == null || args.arguments() == null) return defaultValue;
+        Object value = args.arguments().get(key);
         return value != null ? ((Number) value).intValue() : defaultValue;
     }
 
     /**
-     * Gets an optional integer argument from the args map, returning null if not present.
+     * Gets an optional integer argument from the CallToolRequest, returning null if not present.
      */
-    protected Integer getOptionalIntArg(Map<String, Object> args, String key) {
-        if (args == null) return null;
-        Object value = args.get(key);
+    protected Integer getOptionalIntArg(McpSchema.CallToolRequest args, String key) {
+        if (args == null || args.arguments() == null) return null;
+        Object value = args.arguments().get(key);
         return value != null ? ((Number) value).intValue() : null;
     }
 
     /**
-     * Gets a map argument from the args map, returning null if not present.
+     * Gets a map argument from the CallToolRequest, returning null if not present.
      */
     @SuppressWarnings("unchecked")
-    protected Map<String, Object> getMapArg(Map<String, Object> args, String key) {
-        if (args == null) return null;
-        return (Map<String, Object>) args.get(key);
+    protected Map<String, Object> getMapArg(McpSchema.CallToolRequest args, String key) {
+        if (args == null || args.arguments() == null) return null;
+        return (Map<String, Object>) args.arguments().get(key);
     }
 }

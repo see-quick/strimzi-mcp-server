@@ -1,6 +1,7 @@
 package io.seequick.mcp.tool.user;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.user.KafkaUser;
@@ -9,8 +10,6 @@ import io.strimzi.api.kafka.model.user.KafkaUserList;
 import io.strimzi.api.kafka.model.user.KafkaUserScramSha512ClientAuthentication;
 import io.strimzi.api.kafka.model.user.KafkaUserTlsClientAuthentication;
 import io.seequick.mcp.tool.AbstractStrimziTool;
-
-import java.util.Map;
 
 /**
  * Tool to create a new KafkaUser resource.
@@ -71,7 +70,7 @@ public class CreateUserTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected CallToolResult execute(Map<String, Object> args) {
+    protected CallToolResult execute(McpSchema.CallToolRequest args) {
         try {
             String name = getStringArg(args, "name");
             String namespace = getStringArg(args, "namespace");

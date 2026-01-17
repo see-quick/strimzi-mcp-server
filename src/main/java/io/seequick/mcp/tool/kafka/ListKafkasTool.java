@@ -1,13 +1,12 @@
 package io.seequick.mcp.tool.kafka;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.kafka.Kafka;
 import io.strimzi.api.kafka.model.kafka.KafkaList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
-
-import java.util.Map;
 
 /**
  * Tool to list Strimzi Kafka clusters in the Kubernetes cluster.
@@ -46,7 +45,7 @@ public class ListKafkasTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected CallToolResult execute(Map<String, Object> args) {
+    protected CallToolResult execute(McpSchema.CallToolRequest args) {
         try {
             String namespace = getStringArg(args, "namespace");
 

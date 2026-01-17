@@ -1,13 +1,12 @@
 package io.seequick.mcp.tool.cluster;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.nodepool.KafkaNodePool;
 import io.strimzi.api.kafka.model.nodepool.KafkaNodePoolList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
-
-import java.util.Map;
 
 /**
  * Tool to list Strimzi KafkaNodePool resources.
@@ -50,7 +49,7 @@ public class ListNodePoolsTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected CallToolResult execute(Map<String, Object> args) {
+    protected CallToolResult execute(McpSchema.CallToolRequest args) {
         try {
             String namespace = getStringArg(args, "namespace");
             String kafkaCluster = getStringArg(args, "kafkaCluster");

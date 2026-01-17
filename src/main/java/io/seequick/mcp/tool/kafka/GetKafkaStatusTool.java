@@ -1,13 +1,12 @@
 package io.seequick.mcp.tool.kafka;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.kafka.Kafka;
 import io.strimzi.api.kafka.model.kafka.KafkaList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
-
-import java.util.Map;
 
 /**
  * Tool to get detailed status of a Strimzi Kafka cluster.
@@ -51,7 +50,7 @@ public class GetKafkaStatusTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected CallToolResult execute(Map<String, Object> args) {
+    protected CallToolResult execute(McpSchema.CallToolRequest args) {
         try {
             String name = getStringArg(args, "name");
             String namespace = getStringArg(args, "namespace");

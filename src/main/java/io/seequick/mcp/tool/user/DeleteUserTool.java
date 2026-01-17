@@ -1,13 +1,12 @@
 package io.seequick.mcp.tool.user;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.user.KafkaUser;
 import io.strimzi.api.kafka.model.user.KafkaUserList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
-
-import java.util.Map;
 
 /**
  * Tool to delete a KafkaUser resource.
@@ -51,7 +50,7 @@ public class DeleteUserTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected CallToolResult execute(Map<String, Object> args) {
+    protected CallToolResult execute(McpSchema.CallToolRequest args) {
         try {
             String name = getStringArg(args, "name");
             String namespace = getStringArg(args, "namespace");
