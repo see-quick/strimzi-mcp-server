@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+VERSION="${STRIMZI_MCP_VERSION:-0.1.0}"
+JAR_DIR="${HOME}/.strimzi-mcp"
+JAR_PATH="${JAR_DIR}/strimzi-mcp-server-${VERSION}.jar"
+REPO="strimzi/strimzi-mcp-server"
+
+# Download jar if not present
+if [ ! -f "$JAR_PATH" ]; then
+  echo "Downloading strimzi-mcp-server v${VERSION}..." >&2
+  mkdir -p "$JAR_DIR"
+  curl -fsSL -o "$JAR_PATH" \
+    "https://github.com/${REPO}/releases/download/v${VERSION}/strimzi-mcp-server-${VERSION}.jar"
+  echo "Downloaded to ${JAR_PATH}" >&2
+fi
+
+exec java -jar "$JAR_PATH" "$@"

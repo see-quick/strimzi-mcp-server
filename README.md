@@ -54,20 +54,26 @@ Enables AI assistants like Claude to manage and troubleshoot Strimzi resources.
 mvn package -DskipTests
 ```
 
-## Usage
+## Installation
 
-Add to Claude Code settings (`~/.claude/settings.json`):
+### Option 1: Claude Code Plugin (Recommended)
 
-```json
-{
-  "mcpServers": {
-    "strimzi": {
-      "command": "java",
-      "args": ["-jar", "/path/to/strimzi-mcp-server-0.1.0-SNAPSHOT.jar"]
-    }
-  }
-}
+```bash
+/plugin marketplace add strimzi/strimzi-mcp-server
+/plugin install strimzi-mcp@strimzi-strimzi-mcp-server
 ```
+
+The plugin automatically downloads the jar on first use.
+
+### Option 2: Manual
+
+Download from [GitHub Releases](https://github.com/strimzi/strimzi-mcp-server/releases) and configure:
+
+```bash
+claude mcp add strimzi -- java -jar /path/to/strimzi-mcp-server.jar
+```
+
+## Configuration
 
 The server uses your local kubeconfig (`~/.kube/config`) to connect to the Kubernetes cluster.
 

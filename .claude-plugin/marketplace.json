@@ -1,0 +1,12 @@
+{
+  "owner": {
+    "name": "Strimzi Community"
+  },
+  "plugins": [
+    {
+      "name": "strimzi-mcp",
+      "source": "./",
+      "description": "MCP server for Strimzi Kafka on Kubernetes"
+    }
+  ]
+}
