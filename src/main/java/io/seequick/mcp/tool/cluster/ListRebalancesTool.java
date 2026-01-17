@@ -2,6 +2,7 @@ package io.seequick.mcp.tool.cluster;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.rebalance.KafkaRebalance;
 import io.strimzi.api.kafka.model.rebalance.KafkaRebalanceList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
@@ -44,8 +45,8 @@ public class ListRebalancesTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected String getInputSchema() {
-        return SCHEMA;
+    protected JsonSchema getInputSchema() {
+        return parseSchema(SCHEMA);
     }
 
     @Override

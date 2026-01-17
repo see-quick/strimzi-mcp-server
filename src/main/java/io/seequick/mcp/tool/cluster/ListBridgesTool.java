@@ -2,6 +2,7 @@ package io.seequick.mcp.tool.cluster;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.bridge.KafkaBridge;
 import io.strimzi.api.kafka.model.bridge.KafkaBridgeList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
@@ -40,8 +41,8 @@ public class ListBridgesTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected String getInputSchema() {
-        return SCHEMA;
+    protected JsonSchema getInputSchema() {
+        return parseSchema(SCHEMA);
     }
 
     @Override

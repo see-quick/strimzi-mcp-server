@@ -2,6 +2,7 @@ package io.seequick.mcp.tool.cluster;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.mirrormaker2.KafkaMirrorMaker2;
 import io.strimzi.api.kafka.model.mirrormaker2.KafkaMirrorMaker2List;
 import io.seequick.mcp.tool.AbstractStrimziTool;
@@ -45,8 +46,8 @@ public class DescribeMirrorMaker2Tool extends AbstractStrimziTool {
     }
 
     @Override
-    protected String getInputSchema() {
-        return SCHEMA;
+    protected JsonSchema getInputSchema() {
+        return parseSchema(SCHEMA);
     }
 
     @Override

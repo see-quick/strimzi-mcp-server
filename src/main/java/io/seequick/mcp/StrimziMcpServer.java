@@ -3,6 +3,7 @@ package io.seequick.mcp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
@@ -108,7 +109,7 @@ public class StrimziMcpServer {
      * Starts the MCP server with stdio transport.
      */
     public void start() {
-        StdioServerTransportProvider transportProvider = new StdioServerTransportProvider(new ObjectMapper());
+        StdioServerTransportProvider transportProvider = new StdioServerTransportProvider(new JacksonMcpJsonMapper(new ObjectMapper()));
 
         McpSyncServer syncServer = McpServer.sync(transportProvider)
                 .serverInfo(SERVER_NAME, SERVER_VERSION)

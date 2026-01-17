@@ -17,7 +17,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <mcp-sdk.version>0.10.0</mcp-sdk.version>
+        <mcp-sdk.version>0.14.0</mcp-sdk.version>
         <fabric8.version>7.5.1</fabric8.version>
         <strimzi.version>0.49.1</strimzi.version>
         <slf4j.version>2.0.17</slf4j.version>

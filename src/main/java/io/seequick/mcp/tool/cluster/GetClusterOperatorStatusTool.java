@@ -2,6 +2,7 @@ package io.seequick.mcp.tool.cluster;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.seequick.mcp.tool.AbstractStrimziTool;
 
 import java.util.Map;
@@ -38,8 +39,8 @@ public class GetClusterOperatorStatusTool extends AbstractStrimziTool {
     }
 
     @Override
-    protected String getInputSchema() {
-        return SCHEMA;
+    protected JsonSchema getInputSchema() {
+        return parseSchema(SCHEMA);
     }
 
     @Override

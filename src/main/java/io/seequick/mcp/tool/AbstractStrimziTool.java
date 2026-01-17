@@ -1,9 +1,11 @@
 package io.seequick.mcp.tool;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
 
@@ -14,6 +16,8 @@ import java.util.Map;
  * Abstract base class for Strimzi MCP tools providing common functionality.
  */
 public abstract class AbstractStrimziTool implements StrimziTool {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     protected final KubernetesClient kubernetesClient;
 
@@ -34,17 +38,50 @@ public abstract class AbstractStrimziTool implements StrimziTool {
     /**
      * Returns the JSON schema for the tool's input parameters.
      */
-    protected abstract String getInputSchema();
+    protected abstract JsonSchema getInputSchema();
 
     /**
      * Executes the tool with the given arguments.
      */
     protected abstract CallToolResult execute(Map<String, Object> args);
 
+    /**
+     * Parses a JSON schema string into a JsonSchema object.
+     */
+    @SuppressWarnings("unchecked")
+    protected static JsonSchema parseSchema(String jsonSchema) {
+        try {
+            Map<String, Object> schemaMap = OBJECT_MAPPER.readValue(
+                jsonSchema, new TypeReference<>() {});
+
+            String type = (String) schemaMap.get("type");
+            Map<String, Object> properties = (Map<String, Object>) schemaMap.get("properties");
+            List<String> required = (List<String>) schemaMap.get("required");
+            Boolean additionalProperties = schemaMap.get("additionalProperties") instanceof Boolean b ? b : null;
+            Map<String, Object> defs = (Map<String, Object>) schemaMap.get("$defs");
+            Map<String, Object> definitions = (Map<String, Object>) schemaMap.get("definitions");
+
+            return new JsonSchema(
+                type,
+            properties,
+                required,
+                additionalProperties,
+                defs,
+                definitions
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse JSON schema: " + e.getMessage(), e);
+        }
+    }
+
     @Override
     public McpServerFeatures.SyncToolSpecification getSpecification() {
         return new McpServerFeatures.SyncToolSpecification(
-                new Tool(getName(), getDescription(), getInputSchema()),
+            Tool.builder()
+                .name(getName())
+                .description(getDescription())
+                .inputSchema(getInputSchema())
+                .build(),
                 (exchange, args) -> execute(args)
         );
     }
