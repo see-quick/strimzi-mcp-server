@@ -59,7 +59,7 @@ mvn package -DskipTests
 ### Option 1: Claude Code Plugin (Recommended)
 
 ```bash
-/plugin marketplace add strimzi/strimzi-mcp-server
+/plugin marketplace add see-quick/strimzi-mcp-server
 /plugin install strimzi-mcp@strimzi-strimzi-mcp-server
 ```
 
@@ -67,7 +67,7 @@ The plugin automatically downloads the jar on first use.
 
 ### Option 2: Manual
 
-Download from [GitHub Releases](https://github.com/strimzi/strimzi-mcp-server/releases) and configure:
+Download from [GitHub Releases](https://github.com/see-quick/strimzi-mcp-server/releases) and configure:
 
 ```bash
 claude mcp add strimzi -- java -jar /path/to/strimzi-mcp-server.jar

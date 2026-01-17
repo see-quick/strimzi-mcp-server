@@ -4,7 +4,7 @@ set -e
 VERSION="${STRIMZI_MCP_VERSION:-0.1.0}"
 JAR_DIR="${HOME}/.strimzi-mcp"
 JAR_PATH="${JAR_DIR}/strimzi-mcp-server-${VERSION}.jar"
-REPO="strimzi/strimzi-mcp-server"
+REPO="see-quick/strimzi-mcp-server"
 
 # Download jar if not present
 if [ ! -f "$JAR_PATH" ]; then
