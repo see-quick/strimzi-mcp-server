@@ -4,7 +4,7 @@
   <groupId>io.seequick</groupId>
   <artifactId>strimzi-mcp-server</artifactId>
   <name>Strimzi MCP Server</name>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <description>MCP server for interacting with Strimzi Kafka on Kubernetes</description>
   <build>
     <plugins>

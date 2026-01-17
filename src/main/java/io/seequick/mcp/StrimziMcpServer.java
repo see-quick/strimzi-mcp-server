@@ -83,7 +83,7 @@ import java.util.List;
 public class StrimziMcpServer {
 
     private static final String SERVER_NAME = "strimzi-mcp-server";
-    private static final String SERVER_VERSION = "0.2.0";
+    private static final String SERVER_VERSION = "0.3.0";
 
     private final KubernetesClient kubernetesClient;
     private final List<StrimziTool> tools;
