@@ -9,6 +9,12 @@ import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
 import io.seequick.mcp.tool.StrimziTool;
+// Cluster tools
+import io.seequick.mcp.tool.cluster.ApproveRebalanceTool;
+import io.seequick.mcp.tool.cluster.CreateConnectorTool;
+import io.seequick.mcp.tool.cluster.CreateMirrorMaker2Tool;
+import io.seequick.mcp.tool.cluster.CreateRebalanceTool;
+import io.seequick.mcp.tool.cluster.DeleteConnectorTool;
 import io.seequick.mcp.tool.cluster.DescribeBridgeTool;
 import io.seequick.mcp.tool.cluster.DescribeConnectorTool;
 import io.seequick.mcp.tool.cluster.DescribeKafkaConnectTool;
@@ -17,13 +23,36 @@ import io.seequick.mcp.tool.cluster.DescribeNodePoolTool;
 import io.seequick.mcp.tool.cluster.DescribeRebalanceTool;
 import io.seequick.mcp.tool.cluster.GetClusterOperatorStatusTool;
 import io.seequick.mcp.tool.cluster.ListBridgesTool;
+import io.seequick.mcp.tool.cluster.ListConnectPluginsTool;
 import io.seequick.mcp.tool.cluster.ListConnectorsTool;
 import io.seequick.mcp.tool.cluster.ListKafkaConnectsTool;
 import io.seequick.mcp.tool.cluster.ListMirrorMaker2sTool;
 import io.seequick.mcp.tool.cluster.ListNodePoolsTool;
 import io.seequick.mcp.tool.cluster.ListRebalancesTool;
+import io.seequick.mcp.tool.cluster.PauseConnectorTool;
+import io.seequick.mcp.tool.cluster.RefreshRebalanceTool;
+import io.seequick.mcp.tool.cluster.RestartConnectorTool;
+import io.seequick.mcp.tool.cluster.ResumeConnectorTool;
+import io.seequick.mcp.tool.cluster.StopRebalanceTool;
+import io.seequick.mcp.tool.cluster.UpdateConnectorConfigTool;
+// Kafka tools
+import io.seequick.mcp.tool.kafka.GetKafkaListenersTool;
 import io.seequick.mcp.tool.kafka.GetKafkaStatusTool;
 import io.seequick.mcp.tool.kafka.ListKafkasTool;
+import io.seequick.mcp.tool.kafka.RestartKafkaBrokerTool;
+import io.seequick.mcp.tool.kafka.ScaleNodePoolTool;
+// Observability tools
+import io.seequick.mcp.tool.observability.DescribeKafkaPodTool;
+import io.seequick.mcp.tool.observability.GetKafkaEventsTool;
+import io.seequick.mcp.tool.observability.GetKafkaLogsTool;
+import io.seequick.mcp.tool.observability.GetOperatorLogsTool;
+import io.seequick.mcp.tool.observability.HealthCheckTool;
+// Security tools
+import io.seequick.mcp.tool.security.GetCertificateExpiryTool;
+import io.seequick.mcp.tool.security.ListCertificatesTool;
+import io.seequick.mcp.tool.security.RotateUserCredentialsTool;
+// Topic tools
+import io.seequick.mcp.tool.topic.CompareTopicConfigTool;
 import io.seequick.mcp.tool.topic.CreateTopicTool;
 import io.seequick.mcp.tool.topic.DeleteTopicTool;
 import io.seequick.mcp.tool.topic.DescribeTopicTool;
@@ -31,12 +60,20 @@ import io.seequick.mcp.tool.topic.GetTopicOperatorStatusTool;
 import io.seequick.mcp.tool.topic.GetUnreadyTopicsTool;
 import io.seequick.mcp.tool.topic.ListTopicsTool;
 import io.seequick.mcp.tool.topic.UpdateTopicConfigTool;
+// User tools
 import io.seequick.mcp.tool.user.CreateUserTool;
 import io.seequick.mcp.tool.user.DeleteUserTool;
 import io.seequick.mcp.tool.user.DescribeUserTool;
 import io.seequick.mcp.tool.user.GetUserCredentialsTool;
 import io.seequick.mcp.tool.user.GetUserOperatorStatusTool;
+import io.seequick.mcp.tool.user.ListUserAclsTool;
 import io.seequick.mcp.tool.user.ListUsersTool;
+import io.seequick.mcp.tool.user.UpdateUserAclsTool;
+import io.seequick.mcp.tool.user.UpdateUserQuotasTool;
+// Utility tools
+import io.seequick.mcp.tool.utility.ExportResourceYamlTool;
+import io.seequick.mcp.tool.utility.GetStrimziVersionTool;
+import io.seequick.mcp.tool.utility.ListAllResourcesTool;
 
 import java.util.List;
 
@@ -70,6 +107,9 @@ public class StrimziMcpServer {
                 // Kafka cluster tools
                 new ListKafkasTool(kubernetesClient),
                 new GetKafkaStatusTool(kubernetesClient),
+                new GetKafkaListenersTool(kubernetesClient),
+                new RestartKafkaBrokerTool(kubernetesClient),
+                new ScaleNodePoolTool(kubernetesClient),
 
                 // Topic Operator tools
                 new ListTopicsTool(kubernetesClient),
@@ -79,6 +119,7 @@ public class StrimziMcpServer {
                 new UpdateTopicConfigTool(kubernetesClient),
                 new GetUnreadyTopicsTool(kubernetesClient),
                 new GetTopicOperatorStatusTool(kubernetesClient),
+                new CompareTopicConfigTool(kubernetesClient),
 
                 // User Operator tools
                 new ListUsersTool(kubernetesClient),
@@ -87,21 +128,53 @@ public class StrimziMcpServer {
                 new DeleteUserTool(kubernetesClient),
                 new GetUserCredentialsTool(kubernetesClient),
                 new GetUserOperatorStatusTool(kubernetesClient),
+                new UpdateUserAclsTool(kubernetesClient),
+                new UpdateUserQuotasTool(kubernetesClient),
+                new ListUserAclsTool(kubernetesClient),
 
                 // Cluster Operator tools
                 new ListNodePoolsTool(kubernetesClient),
                 new DescribeNodePoolTool(kubernetesClient),
                 new ListKafkaConnectsTool(kubernetesClient),
                 new DescribeKafkaConnectTool(kubernetesClient),
+                new ListConnectPluginsTool(kubernetesClient),
                 new ListConnectorsTool(kubernetesClient),
                 new DescribeConnectorTool(kubernetesClient),
+                new CreateConnectorTool(kubernetesClient),
+                new DeleteConnectorTool(kubernetesClient),
+                new PauseConnectorTool(kubernetesClient),
+                new ResumeConnectorTool(kubernetesClient),
+                new RestartConnectorTool(kubernetesClient),
+                new UpdateConnectorConfigTool(kubernetesClient),
                 new ListRebalancesTool(kubernetesClient),
                 new DescribeRebalanceTool(kubernetesClient),
+                new CreateRebalanceTool(kubernetesClient),
+                new ApproveRebalanceTool(kubernetesClient),
+                new StopRebalanceTool(kubernetesClient),
+                new RefreshRebalanceTool(kubernetesClient),
                 new ListMirrorMaker2sTool(kubernetesClient),
                 new DescribeMirrorMaker2Tool(kubernetesClient),
+                new CreateMirrorMaker2Tool(kubernetesClient),
                 new ListBridgesTool(kubernetesClient),
                 new DescribeBridgeTool(kubernetesClient),
-                new GetClusterOperatorStatusTool(kubernetesClient)
+                new GetClusterOperatorStatusTool(kubernetesClient),
+
+                // Observability tools
+                new GetKafkaLogsTool(kubernetesClient),
+                new GetOperatorLogsTool(kubernetesClient),
+                new GetKafkaEventsTool(kubernetesClient),
+                new DescribeKafkaPodTool(kubernetesClient),
+                new HealthCheckTool(kubernetesClient),
+
+                // Security tools
+                new RotateUserCredentialsTool(kubernetesClient),
+                new ListCertificatesTool(kubernetesClient),
+                new GetCertificateExpiryTool(kubernetesClient),
+
+                // Utility tools
+                new ExportResourceYamlTool(kubernetesClient),
+                new GetStrimziVersionTool(kubernetesClient),
+                new ListAllResourcesTool(kubernetesClient)
         );
     }
 
