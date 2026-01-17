@@ -1,6 +1,7 @@
 # Strimzi MCP Server
 
-> **Note:** This is not an official [Strimzi](https://strimzi.io/) project. It is an independent, community-driven tool.
+> [!NOTE] 
+> This is not an official [Strimzi](https://strimzi.io/) project. It is an independent, community-driven tool.
 
 An MCP (Model Context Protocol) server for interacting with [Strimzi](https://strimzi.io/) Kafka on Kubernetes.
 Enables AI assistants like Claude to manage and troubleshoot Strimzi resources.
