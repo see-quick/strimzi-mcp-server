@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="${STRIMZI_MCP_VERSION:-0.3.0}"
+VERSION="${STRIMZI_MCP_VERSION:-0.4.0}"
 JAR_DIR="${HOME}/.strimzi-mcp"
 JAR_PATH="${JAR_DIR}/strimzi-mcp-server-${VERSION}.jar"
 REPO="see-quick/strimzi-mcp-server"
