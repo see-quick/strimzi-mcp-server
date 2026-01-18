@@ -55,22 +55,16 @@ public class DeleteTopicTool extends AbstractStrimziTool {
             String name = getStringArg(args, "name");
             String namespace = getStringArg(args, "namespace");
 
-            KafkaTopic existing = kubernetesClient.resources(KafkaTopic.class, KafkaTopicList.class)
-                    .inNamespace(namespace)
-                    .withName(name)
-                    .get();
+            // Ensure topic exists
+            ensureExists(KafkaTopic.class, KafkaTopicList.class, namespace, name, "KafkaTopic");
 
-            if (existing == null) {
-                return error("KafkaTopic not found: " + namespace + "/" + name);
-            }
-
-            kubernetesClient.resources(KafkaTopic.class, KafkaTopicList.class)
-                    .inNamespace(namespace)
-                    .withName(name)
-                    .delete();
+            // Delete the topic
+            deleteResource(KafkaTopic.class, KafkaTopicList.class, namespace, name);
 
             return success("Deleted KafkaTopic: " + namespace + "/" + name +
                     "\nThe Topic Operator will delete the topic from Kafka shortly.");
+        } catch (ResourceNotFoundException e) {
+            return error(e.getMessage());
         } catch (Exception e) {
             return error("Error deleting topic: " + e.getMessage());
         }

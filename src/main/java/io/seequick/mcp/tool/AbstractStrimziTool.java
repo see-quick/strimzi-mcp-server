@@ -2,6 +2,8 @@ package io.seequick.mcp.tool;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -135,5 +137,89 @@ public abstract class AbstractStrimziTool implements StrimziTool {
     protected Map<String, Object> getMapArg(McpSchema.CallToolRequest args, String key) {
         if (args == null || args.arguments() == null) return null;
         return (Map<String, Object>) args.arguments().get(key);
+    }
+
+    /**
+     * Gets a boolean argument from the CallToolRequest, returning the default if not present.
+     */
+    protected boolean getBooleanArg(McpSchema.CallToolRequest args, String key, boolean defaultValue) {
+        if (args == null || args.arguments() == null) return defaultValue;
+        Object value = args.arguments().get(key);
+        return value != null ? (Boolean) value : defaultValue;
+    }
+
+    /**
+     * Creates a repository for the specified resource types.
+     */
+    protected <T extends HasMetadata, TList extends KubernetesResourceList<T>> StrimziResourceRepository<T, TList> repository(
+            Class<T> resourceClass, Class<TList> listClass) {
+        return new StrimziResourceRepository<>(kubernetesClient, resourceClass, listClass);
+    }
+
+    /**
+     * Gets an existing resource, returning null if not found.
+     */
+    protected <T extends HasMetadata, TList extends KubernetesResourceList<T>> T getExistingResource(
+            Class<T> resourceClass, Class<TList> listClass, String namespace, String name) {
+        return repository(resourceClass, listClass).get(namespace, name);
+    }
+
+    /**
+     * Ensures a resource does not exist, throwing ResourceExistsException if it does.
+     */
+    protected <T extends HasMetadata, TList extends KubernetesResourceList<T>> void ensureNotExists(
+            Class<T> resourceClass, Class<TList> listClass,
+            String namespace, String name, String resourceType) throws ResourceExistsException {
+        if (repository(resourceClass, listClass).exists(namespace, name)) {
+            throw new ResourceExistsException(resourceType + " already exists: " + namespace + "/" + name);
+        }
+    }
+
+    /**
+     * Ensures a resource exists, throwing ResourceNotFoundException if it doesn't.
+     * Returns the resource if found.
+     */
+    protected <T extends HasMetadata, TList extends KubernetesResourceList<T>> T ensureExists(
+            Class<T> resourceClass, Class<TList> listClass,
+            String namespace, String name, String resourceType) throws ResourceNotFoundException {
+        T resource = repository(resourceClass, listClass).get(namespace, name);
+        if (resource == null) {
+            throw new ResourceNotFoundException(resourceType + " not found: " + namespace + "/" + name);
+        }
+        return resource;
+    }
+
+    /**
+     * Creates a resource in the specified namespace.
+     */
+    protected <T extends HasMetadata, TList extends KubernetesResourceList<T>> T createResource(
+            Class<T> resourceClass, Class<TList> listClass, String namespace, T resource) {
+        return repository(resourceClass, listClass).create(namespace, resource);
+    }
+
+    /**
+     * Deletes a resource by namespace and name.
+     */
+    protected <T extends HasMetadata, TList extends KubernetesResourceList<T>> void deleteResource(
+            Class<T> resourceClass, Class<TList> listClass, String namespace, String name) {
+        repository(resourceClass, listClass).delete(namespace, name);
+    }
+
+    /**
+     * Exception thrown when a resource already exists.
+     */
+    public static class ResourceExistsException extends Exception {
+        public ResourceExistsException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * Exception thrown when a resource is not found.
+     */
+    public static class ResourceNotFoundException extends Exception {
+        public ResourceNotFoundException(String message) {
+            super(message);
+        }
     }
 }

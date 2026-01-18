@@ -7,6 +7,7 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.nodepool.KafkaNodePool;
 import io.strimzi.api.kafka.model.nodepool.KafkaNodePoolList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
+import io.seequick.mcp.tool.StrimziLabels;
 
 /**
  * Tool to list Strimzi KafkaNodePool resources.
@@ -54,7 +55,8 @@ public class ListNodePoolsTool extends AbstractStrimziTool {
             String namespace = getStringArg(args, "namespace");
             String kafkaCluster = getStringArg(args, "kafkaCluster");
 
-            KafkaNodePoolList poolList = listNodePools(namespace, kafkaCluster);
+            KafkaNodePoolList poolList = repository(KafkaNodePool.class, KafkaNodePoolList.class)
+                    .list(namespace, kafkaCluster);
 
             StringBuilder result = new StringBuilder();
             result.append("Found ").append(poolList.getItems().size()).append(" KafkaNodePool(s):\n\n");
@@ -82,8 +84,8 @@ public class ListNodePoolsTool extends AbstractStrimziTool {
 
                 // Cluster label
                 var labels = pool.getMetadata().getLabels();
-                if (labels != null && labels.containsKey("strimzi.io/cluster")) {
-                    result.append(" -> ").append(labels.get("strimzi.io/cluster"));
+                if (labels != null && labels.containsKey(StrimziLabels.CLUSTER)) {
+                    result.append(" -> ").append(labels.get(StrimziLabels.CLUSTER));
                 }
 
                 result.append("\n");
@@ -92,24 +94,6 @@ public class ListNodePoolsTool extends AbstractStrimziTool {
             return success(result.toString());
         } catch (Exception e) {
             return error("Error listing node pools: " + e.getMessage());
-        }
-    }
-
-    private KafkaNodePoolList listNodePools(String namespace, String kafkaCluster) {
-        if (namespace != null && !namespace.isEmpty()) {
-            var resource = kubernetesClient.resources(KafkaNodePool.class, KafkaNodePoolList.class)
-                    .inNamespace(namespace);
-            if (kafkaCluster != null && !kafkaCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", kafkaCluster).list();
-            }
-            return resource.list();
-        } else {
-            var resource = kubernetesClient.resources(KafkaNodePool.class, KafkaNodePoolList.class)
-                    .inAnyNamespace();
-            if (kafkaCluster != null && !kafkaCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", kafkaCluster).list();
-            }
-            return resource.list();
         }
     }
 }

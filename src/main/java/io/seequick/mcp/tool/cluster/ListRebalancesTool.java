@@ -7,6 +7,7 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.rebalance.KafkaRebalance;
 import io.strimzi.api.kafka.model.rebalance.KafkaRebalanceList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
+import io.seequick.mcp.tool.StrimziLabels;
 
 /**
  * Tool to list Strimzi KafkaRebalance resources.
@@ -54,7 +55,8 @@ public class ListRebalancesTool extends AbstractStrimziTool {
             String namespace = getStringArg(args, "namespace");
             String kafkaCluster = getStringArg(args, "kafkaCluster");
 
-            KafkaRebalanceList rebalanceList = listRebalances(namespace, kafkaCluster);
+            KafkaRebalanceList rebalanceList = repository(KafkaRebalance.class, KafkaRebalanceList.class)
+                    .list(namespace, kafkaCluster);
 
             StringBuilder result = new StringBuilder();
             result.append("Found ").append(rebalanceList.getItems().size()).append(" KafkaRebalance(s):\n\n");
@@ -87,8 +89,8 @@ public class ListRebalancesTool extends AbstractStrimziTool {
 
                 // Cluster label
                 var labels = rebalance.getMetadata().getLabels();
-                if (labels != null && labels.containsKey("strimzi.io/cluster")) {
-                    result.append(" -> ").append(labels.get("strimzi.io/cluster"));
+                if (labels != null && labels.containsKey(StrimziLabels.CLUSTER)) {
+                    result.append(" -> ").append(labels.get(StrimziLabels.CLUSTER));
                 }
 
                 result.append("\n");
@@ -97,24 +99,6 @@ public class ListRebalancesTool extends AbstractStrimziTool {
             return success(result.toString());
         } catch (Exception e) {
             return error("Error listing rebalances: " + e.getMessage());
-        }
-    }
-
-    private KafkaRebalanceList listRebalances(String namespace, String kafkaCluster) {
-        if (namespace != null && !namespace.isEmpty()) {
-            var resource = kubernetesClient.resources(KafkaRebalance.class, KafkaRebalanceList.class)
-                    .inNamespace(namespace);
-            if (kafkaCluster != null && !kafkaCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", kafkaCluster).list();
-            }
-            return resource.list();
-        } else {
-            var resource = kubernetesClient.resources(KafkaRebalance.class, KafkaRebalanceList.class)
-                    .inAnyNamespace();
-            if (kafkaCluster != null && !kafkaCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", kafkaCluster).list();
-            }
-            return resource.list();
         }
     }
 }

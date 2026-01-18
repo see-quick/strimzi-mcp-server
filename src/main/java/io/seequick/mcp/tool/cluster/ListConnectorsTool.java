@@ -7,6 +7,7 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.connector.KafkaConnector;
 import io.strimzi.api.kafka.model.connector.KafkaConnectorList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
+import io.seequick.mcp.tool.StrimziLabels;
 
 import java.util.Map;
 
@@ -56,7 +57,8 @@ public class ListConnectorsTool extends AbstractStrimziTool {
             String namespace = getStringArg(args, "namespace");
             String connectCluster = getStringArg(args, "connectCluster");
 
-            KafkaConnectorList connectorList = listConnectors(namespace, connectCluster);
+            KafkaConnectorList connectorList = repository(KafkaConnector.class, KafkaConnectorList.class)
+                    .list(namespace, connectCluster);
 
             StringBuilder result = new StringBuilder();
             result.append("Found ").append(connectorList.getItems().size()).append(" KafkaConnector(s):\n\n");
@@ -96,8 +98,8 @@ public class ListConnectorsTool extends AbstractStrimziTool {
 
                 // Cluster label
                 var labels = connector.getMetadata().getLabels();
-                if (labels != null && labels.containsKey("strimzi.io/cluster")) {
-                    result.append(" -> ").append(labels.get("strimzi.io/cluster"));
+                if (labels != null && labels.containsKey(StrimziLabels.CLUSTER)) {
+                    result.append(" -> ").append(labels.get(StrimziLabels.CLUSTER));
                 }
 
                 result.append("\n");
@@ -106,24 +108,6 @@ public class ListConnectorsTool extends AbstractStrimziTool {
             return success(result.toString());
         } catch (Exception e) {
             return error("Error listing connectors: " + e.getMessage());
-        }
-    }
-
-    private KafkaConnectorList listConnectors(String namespace, String connectCluster) {
-        if (namespace != null && !namespace.isEmpty()) {
-            var resource = kubernetesClient.resources(KafkaConnector.class, KafkaConnectorList.class)
-                    .inNamespace(namespace);
-            if (connectCluster != null && !connectCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", connectCluster).list();
-            }
-            return resource.list();
-        } else {
-            var resource = kubernetesClient.resources(KafkaConnector.class, KafkaConnectorList.class)
-                    .inAnyNamespace();
-            if (connectCluster != null && !connectCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", connectCluster).list();
-            }
-            return resource.list();
         }
     }
 }

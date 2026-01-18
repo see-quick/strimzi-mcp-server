@@ -10,6 +10,7 @@ import io.strimzi.api.kafka.model.user.KafkaUserList;
 import io.strimzi.api.kafka.model.user.KafkaUserScramSha512ClientAuthentication;
 import io.strimzi.api.kafka.model.user.KafkaUserTlsClientAuthentication;
 import io.seequick.mcp.tool.AbstractStrimziTool;
+import io.seequick.mcp.tool.StrimziLabels;
 
 /**
  * Tool to create a new KafkaUser resource.
@@ -83,21 +84,14 @@ public class CreateUserTool extends AbstractStrimziTool {
             Integer consumerByteRate = getOptionalIntArg(args, "consumerByteRate");
 
             // Check if user already exists
-            KafkaUser existing = kubernetesClient.resources(KafkaUser.class, KafkaUserList.class)
-                    .inNamespace(namespace)
-                    .withName(name)
-                    .get();
-
-            if (existing != null) {
-                return error("KafkaUser already exists: " + namespace + "/" + name);
-            }
+            ensureNotExists(KafkaUser.class, KafkaUserList.class, namespace, name, "KafkaUser");
 
             // Build the user
             var userBuilder = new KafkaUserBuilder()
                     .withNewMetadata()
                         .withName(name)
                         .withNamespace(namespace)
-                        .addToLabels("strimzi.io/cluster", kafkaCluster)
+                        .addToLabels(StrimziLabels.CLUSTER, kafkaCluster)
                     .endMetadata()
                     .withNewSpec()
                     .endSpec();
@@ -124,11 +118,7 @@ public class CreateUserTool extends AbstractStrimziTool {
             }
 
             KafkaUser user = userBuilder.build();
-
-            kubernetesClient.resources(KafkaUser.class, KafkaUserList.class)
-                    .inNamespace(namespace)
-                    .resource(user)
-                    .create();
+            createResource(KafkaUser.class, KafkaUserList.class, namespace, user);
 
             StringBuilder result = new StringBuilder();
             result.append("Created KafkaUser: ").append(namespace).append("/").append(name).append("\n");
@@ -144,6 +134,8 @@ public class CreateUserTool extends AbstractStrimziTool {
             result.append("\nCredentials will be stored in secret: ").append(name);
 
             return success(result.toString());
+        } catch (ResourceExistsException e) {
+            return error(e.getMessage());
         } catch (Exception e) {
             return error("Error creating user: " + e.getMessage());
         }

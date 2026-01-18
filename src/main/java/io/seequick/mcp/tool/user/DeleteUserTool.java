@@ -55,22 +55,16 @@ public class DeleteUserTool extends AbstractStrimziTool {
             String name = getStringArg(args, "name");
             String namespace = getStringArg(args, "namespace");
 
-            KafkaUser existing = kubernetesClient.resources(KafkaUser.class, KafkaUserList.class)
-                    .inNamespace(namespace)
-                    .withName(name)
-                    .get();
+            // Ensure user exists
+            ensureExists(KafkaUser.class, KafkaUserList.class, namespace, name, "KafkaUser");
 
-            if (existing == null) {
-                return error("KafkaUser not found: " + namespace + "/" + name);
-            }
-
-            kubernetesClient.resources(KafkaUser.class, KafkaUserList.class)
-                    .inNamespace(namespace)
-                    .withName(name)
-                    .delete();
+            // Delete the user
+            deleteResource(KafkaUser.class, KafkaUserList.class, namespace, name);
 
             return success("Deleted KafkaUser: " + namespace + "/" + name +
                     "\nThe User Operator will remove the user from Kafka and delete associated credentials shortly.");
+        } catch (ResourceNotFoundException e) {
+            return error(e.getMessage());
         } catch (Exception e) {
             return error("Error deleting user: " + e.getMessage());
         }

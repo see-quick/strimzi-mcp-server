@@ -7,6 +7,7 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.strimzi.api.kafka.model.user.KafkaUser;
 import io.strimzi.api.kafka.model.user.KafkaUserList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
+import io.seequick.mcp.tool.StrimziLabels;
 
 /**
  * Tool to list Strimzi KafkaUser resources.
@@ -54,7 +55,8 @@ public class ListUsersTool extends AbstractStrimziTool {
             String namespace = getStringArg(args, "namespace");
             String kafkaCluster = getStringArg(args, "kafkaCluster");
 
-            KafkaUserList userList = listUsers(namespace, kafkaCluster);
+            KafkaUserList userList = repository(KafkaUser.class, KafkaUserList.class)
+                    .list(namespace, kafkaCluster);
 
             StringBuilder result = new StringBuilder();
             result.append("Found ").append(userList.getItems().size()).append(" KafkaUser(s):\n\n");
@@ -86,8 +88,8 @@ public class ListUsersTool extends AbstractStrimziTool {
 
                 // Cluster label
                 var labels = user.getMetadata().getLabels();
-                if (labels != null && labels.containsKey("strimzi.io/cluster")) {
-                    result.append(" -> ").append(labels.get("strimzi.io/cluster"));
+                if (labels != null && labels.containsKey(StrimziLabels.CLUSTER)) {
+                    result.append(" -> ").append(labels.get(StrimziLabels.CLUSTER));
                 }
 
                 result.append("\n");
@@ -96,24 +98,6 @@ public class ListUsersTool extends AbstractStrimziTool {
             return success(result.toString());
         } catch (Exception e) {
             return error("Error listing users: " + e.getMessage());
-        }
-    }
-
-    private KafkaUserList listUsers(String namespace, String kafkaCluster) {
-        if (namespace != null && !namespace.isEmpty()) {
-            var resource = kubernetesClient.resources(KafkaUser.class, KafkaUserList.class)
-                    .inNamespace(namespace);
-            if (kafkaCluster != null && !kafkaCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", kafkaCluster).list();
-            }
-            return resource.list();
-        } else {
-            var resource = kubernetesClient.resources(KafkaUser.class, KafkaUserList.class)
-                    .inAnyNamespace();
-            if (kafkaCluster != null && !kafkaCluster.isEmpty()) {
-                return resource.withLabel("strimzi.io/cluster", kafkaCluster).list();
-            }
-            return resource.list();
         }
     }
 }

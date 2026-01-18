@@ -8,6 +8,7 @@ import io.strimzi.api.kafka.model.topic.KafkaTopic;
 import io.strimzi.api.kafka.model.topic.KafkaTopicBuilder;
 import io.strimzi.api.kafka.model.topic.KafkaTopicList;
 import io.seequick.mcp.tool.AbstractStrimziTool;
+import io.seequick.mcp.tool.StrimziLabels;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,21 +81,14 @@ public class CreateTopicTool extends AbstractStrimziTool {
             Map<String, Object> config = getMapArg(args, "config");
 
             // Check if topic already exists
-            KafkaTopic existing = kubernetesClient.resources(KafkaTopic.class, KafkaTopicList.class)
-                    .inNamespace(namespace)
-                    .withName(name)
-                    .get();
-
-            if (existing != null) {
-                return error("KafkaTopic already exists: " + namespace + "/" + name);
-            }
+            ensureNotExists(KafkaTopic.class, KafkaTopicList.class, namespace, name, "KafkaTopic");
 
             // Build the topic
             var topicBuilder = new KafkaTopicBuilder()
                     .withNewMetadata()
                         .withName(name)
                         .withNamespace(namespace)
-                        .addToLabels("strimzi.io/cluster", kafkaCluster)
+                        .addToLabels(StrimziLabels.CLUSTER, kafkaCluster)
                     .endMetadata()
                     .withNewSpec()
                         .withPartitions(partitions)
@@ -103,16 +97,11 @@ public class CreateTopicTool extends AbstractStrimziTool {
 
             // Add config if provided
             if (config != null && !config.isEmpty()) {
-                Map<String, Object> configMap = new HashMap<>(config);
-                topicBuilder.editSpec().withConfig(configMap).endSpec();
+                topicBuilder.editSpec().withConfig(new HashMap<>(config)).endSpec();
             }
 
             KafkaTopic topic = topicBuilder.build();
-
-            kubernetesClient.resources(KafkaTopic.class, KafkaTopicList.class)
-                    .inNamespace(namespace)
-                    .resource(topic)
-                    .create();
+            createResource(KafkaTopic.class, KafkaTopicList.class, namespace, topic);
 
             StringBuilder result = new StringBuilder();
             result.append("Created KafkaTopic: ").append(namespace).append("/").append(name).append("\n");
@@ -125,6 +114,8 @@ public class CreateTopicTool extends AbstractStrimziTool {
             result.append("\nThe Topic Operator will create the topic in Kafka shortly.");
 
             return success(result.toString());
+        } catch (ResourceExistsException e) {
+            return error(e.getMessage());
         } catch (Exception e) {
             return error("Error creating topic: " + e.getMessage());
         }
