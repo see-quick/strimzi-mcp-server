@@ -30,8 +30,14 @@ jobs:
 
       - name: Rename jar for release
         run: |
-          mv target/strimzi-mcp-server-*-SNAPSHOT.jar target/strimzi-mcp-server-${{ steps.version.outputs.VERSION }}.jar 2>/dev/null || \
-          mv target/strimzi-mcp-server-*.jar target/strimzi-mcp-server-${{ steps.version.outputs.VERSION }}.jar
+          TARGET_JAR="target/strimzi-mcp-server-${{ steps.version.outputs.VERSION }}.jar"
+          if [ -f "$TARGET_JAR" ]; then
+            echo "Jar already has correct name: $TARGET_JAR"
+          elif ls target/strimzi-mcp-server-*-SNAPSHOT.jar 1>/dev/null 2>&1; then
+            mv target/strimzi-mcp-server-*-SNAPSHOT.jar "$TARGET_JAR"
+          else
+            mv target/strimzi-mcp-server-*.jar "$TARGET_JAR"
+          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
