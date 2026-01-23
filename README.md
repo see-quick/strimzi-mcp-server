@@ -101,7 +101,7 @@ mvn package -DskipTests
 ### Option 1: Claude Code Plugin (Recommended)
 
 ```bash
-/plugin marketplace add see-quick/strimzi-mcp-server
+/plugin marketplace add https://github.com/see-quick/strimzi-mcp-server
 /plugin install strimzi-mcp@see-quick-strimzi-mcp-server
 ```
 
